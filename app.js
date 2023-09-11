@@ -1,4 +1,5 @@
-const OPERATIONTYPE = require("./operationTypes")
+const {operationTypes : OPERATIONTYPE, collectionNames} = require("./operationTypes")
+const { getTokenHandler } = require('./services')
 const client_setup = require('./client_setup')
 const gl_detail = require('./gl_detail')
 const gl_mapping = require('./gl_mapping')
@@ -6,13 +7,23 @@ const property_mapping = require('./property_mapping')
 const segment_mapping = require('./segment_mapping')
 const inputJson = require("./gl_detail.json")
 
-const mapping = {
-    AtlasGlobalHoa_GL_details: gl_detail,
-    AtlasGlobalHoa_GL_mapping: gl_mapping,
-    AtlasGlobalHoa_Property_mapping: property_mapping,
-    AtlasGlobalHoa_Client_setup: client_setup,
-    AtlasGlobalHoa_Segment_mapping: segment_mapping
-  }
+const mapping = {};
+
+const mappingHandler = (collectionNames, res) => {
+    for (let i = 0; i < collectionNames.length; i++) {
+        mapping[collectionNames[i]] = res[i].data.data;
+    }
+}
+
+
+
+// const mapping = {
+//     AtlasGlobalHoa_GL_details: gl_detail,
+//     AtlasGlobalHoa_GL_mapping: gl_mapping,
+//     AtlasGlobalHoa_Property_mapping: property_mapping,
+//     AtlasGlobalHoa_Client_setup: client_setup,
+//     AtlasGlobalHoa_Segment_mapping: segment_mapping
+//   }
 
 const checkBaseCondition = (obj, inputJson) => {
     if(JSON.stringify(inputJson.baseCondition) === '{}') return true
@@ -285,31 +296,47 @@ const copyHandler = (obj, inputJson, output) => {
     return finalOutput
 }
 
-gl_detail.forEach(detail => {
-    let finalOutput = {}
-    inputJson.operations.forEach(operation => {
-        let calculatedValue = ''
-        switch(operation.operationType) {
-            case OPERATIONTYPE.LOOKUP:
-                calculatedValue = lookupHandler(detail, operation);
-                break;
-            case OPERATIONTYPE.CONCAT:
-                calculatedValue = concatHandler(detail, operation);
-                break;
-            case OPERATIONTYPE.CALCULATION:
-                calculatedValue = calculationHandler(detail, operation);
-                break;
-            case OPERATIONTYPE.COPY:
-                calculatedValue = copyHandler(detail, operation, finalOutput);
-                break;
-            default:
-                console.log("Invalid Operation");
-        }
-        finalOutput = {
-            ...finalOutput,
-            [operation.destinationField.newColumnName]: calculatedValue
-        }
+const main = () => {
+    console.log('OK')
+    mapping[inputJson.baseCollection].forEach(detail => {
+        let finalOutput = {}
+        inputJson.operations.forEach(operation => {
+            let calculatedValue = ''
+            switch(operation.operationType) {
+                case OPERATIONTYPE.LOOKUP:
+                    calculatedValue = lookupHandler(detail, operation);
+                    break;
+                case OPERATIONTYPE.CONCAT:
+                    calculatedValue = concatHandler(detail, operation);
+                    break;
+                case OPERATIONTYPE.CALCULATION:
+                    calculatedValue = calculationHandler(detail, operation);
+                    break;
+                case OPERATIONTYPE.COPY:
+                    calculatedValue = copyHandler(detail, operation, finalOutput);
+                    break;
+                default:
+                    console.log("Invalid Operation");
+            }
+            finalOutput = {
+                ...finalOutput,
+                [operation.destinationField.newColumnName]: calculatedValue
+            }
+        })
+    
+        console.log(finalOutput)
     })
+}
 
-    console.log(finalOutput)
-})
+getTokenHandler().then(res => {
+    console.log(res) 
+    if(collectionNames.length === res.length) {
+        mappingHandler(collectionNames, res)
+        main()
+    } else {
+        throw Error;
+    }
+    
+    }).catch(err => {
+        console.log("FROM APP", err)
+    })

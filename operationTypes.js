@@ -5,4 +5,6 @@ const operationTypes = {
     COPY: 'copy'
 }
 
-module.exports = operationTypes
+const collectionNames = ['AtlasGlobalHoa_GL_details', 'AtlasGlobalHoa_GL_mapping', 'AtlasGlobalHoa_Property_mapping', 'AtlasGlobalHoa_Client_setup', 'AtlasGlobalHoa_Segment_mapping']
+
+module.exports = {operationTypes, collectionNames}

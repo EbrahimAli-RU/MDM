@@ -1,4 +1,5 @@
 {
+    "baseCollection": "AtlasGlobalHoa_GL_details",
     "operations": [
         {
             "destinationField": {

@@ -10,6 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "arangojs": "^5.8.0"
+    "arangojs": "^5.8.0",
+    "axios": "^1.5.0",
+    "ps": "^1.0.0",
+    "qs": "^6.11.2"
   }
 }
