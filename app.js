@@ -1,5 +1,5 @@
 const {operationTypes : OPERATIONTYPE, collectionNames} = require("./operationTypes")
-const { getTokenHandler } = require('./services')
+const { getTokenHandler, getCount, getBaseCollectionData } = require('./services')
 const client_setup = require('./client_setup')
 const gl_detail = require('./gl_detail')
 const gl_mapping = require('./gl_mapping')
@@ -296,9 +296,8 @@ const copyHandler = (obj, inputJson, output) => {
     return finalOutput
 }
 
-const main = () => {
-    console.log('OK')
-    mapping[inputJson.baseCollection].forEach(detail => {
+const startProcessing = (data) => {
+    data.forEach(detail => {
         let finalOutput = {}
         inputJson.operations.forEach(operation => {
             let calculatedValue = ''
@@ -328,9 +327,21 @@ const main = () => {
     })
 }
 
+const main = async () => {
+    let skip = 0, limit = 10
+    const totalDataCount = getCount()
+    for(let i = 0;i<=totalDataCount;i = i + limit) {
+        const data = await getBaseCollectionData(inputJson.baseCollection, i, limit)
+        mapping[inputJson.baseCollection] = data
+        startProcessing(data)
+    }
+}
+
+    
+
 getTokenHandler().then(res => {
     console.log(res) 
-    if(collectionNames.length === res.length) {
+    if((collectionNames.length - 1) === res.length) {
         mappingHandler(collectionNames, res)
         main()
     } else {
