@@ -14,7 +14,8 @@ const getTokenHandler = async () => {
     try {
         const response =  await axios.post(`https://api.premisehq.co/v3/accounts/token`, qs.stringify(payload))
         credential = response.data
-        await getCount()
+        console.log()
+        // await getCount()
         return await getAllCollectionData()
     } catch(err) {
         console.log("Failed to get Credential")

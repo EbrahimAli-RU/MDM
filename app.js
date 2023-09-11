@@ -10,8 +10,8 @@ const inputJson = require("./gl_detail.json")
 const mapping = {};
 
 const mappingHandler = (collectionNames, res) => {
-    for (let i = 0; i < collectionNames.length; i++) {
-        mapping[collectionNames[i]] = res[i].data.data;
+    for (let i = 1; i < collectionNames.length; i++) {
+        mapping[collectionNames[i]] = res[i-1].data.data;
     }
 }
 
