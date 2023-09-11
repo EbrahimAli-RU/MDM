@@ -34,9 +34,10 @@ const getCount = async () => {
           },
           {headers: {'Authorization': `Bearer ${credential.accessToken}` }}
         )
-        console.log(response.data.data[0].count)
+        return response.data.data[0].count;
     } catch(err) {
         console.log('From Response')
+        return 0;
     }
 }
 
@@ -52,9 +53,10 @@ const getBaseCollectionData = async (collectionNames, skip, limit) => {
           },
           {headers: {'Authorization': `Bearer ${credential.accessToken}` }}
         )
-        console.log(response.data.data)
+        return response.data.data
     } catch(err) {
         console.log('From Response')
+        return []
     }
 }
 

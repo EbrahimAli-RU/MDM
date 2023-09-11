@@ -297,6 +297,7 @@ const copyHandler = (obj, inputJson, output) => {
 }
 
 const startProcessing = (data) => {
+
     data.forEach(detail => {
         let finalOutput = {}
         inputJson.operations.forEach(operation => {
@@ -323,13 +324,13 @@ const startProcessing = (data) => {
             }
         })
     
-        console.log(finalOutput)
+        return finalOutput;
     })
 }
 
 const main = async () => {
     let skip = 0, limit = 10
-    const totalDataCount = getCount()
+    const totalDataCount = await getCount()
     for(let i = 0;i<=totalDataCount;i = i + limit) {
         const data = await getBaseCollectionData(inputJson.baseCollection, i, limit)
         mapping[inputJson.baseCollection] = data
@@ -340,7 +341,7 @@ const main = async () => {
     
 
 getTokenHandler().then(res => {
-    console.log(res) 
+    //console.log(res) 
     if((collectionNames.length - 1) === res.length) {
         mappingHandler(collectionNames, res)
         main()
