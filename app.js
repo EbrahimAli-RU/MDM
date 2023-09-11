@@ -14,14 +14,40 @@ const mapping = {
     AtlasGlobalHoa_Segment_mapping: segment_mapping
   }
 
-const checkBaseCondition = () => {
-    return true;
+const checkBaseCondition = (obj, inputJson) => {
+    if(JSON.stringify(inputJson.baseCondition) === '{}') return true
+    let rowValue = {}
+    const {from, collectionName, columnName, matchValue} = inputJson.baseCondition
+    if (from === "client_setup" && mapping[collectionName].length > 0) {
+        rowValue = mapping[collectionName][0];
+      } else if (from === 'array') {
+          const [fromWhere, columnName] = matchWith;
+          const value = (fromWhere === 'base') ? obj[columnName] : totalStore[parseInt(fromWhere)][columnName];
+          rowValue = getSpecficRowValue(value, mapping[collectionName], columnName);
+          store && totalStore.push(rowValue);
+      } else if (from === 'store') {
+        rowValue = totalStore[parseInt(collectionName)];
+      } else {
+        rowValue = obj;
+      }
+      if(matchValue) {
+        for(let idx = 0;idx<matchValue.length;idx++) {
+            if(matchValue[idx].value === rowValue[columnName]) {
+                if(JSON.stringify(matchValue[idx].targetValue) !== '{}') {
+                    inputJson.valueFromTarget = matchValue[idx].targetValue
+                }
+                return true;
+            }
+          }
+      }
+      
+    return false;
 }
 
-const getSpecficRowValue = (valueToMatch, tableName, columnName) => {
-    for(let idx = 0;idx<tableName.length;idx++) {
-        if(tableName[idx][columnName] == valueToMatch) {
-            return tableName[idx]
+const getSpecficRowValue = (valueToMatch, collectionName, columnName) => {
+    for(let idx = 0;idx<collectionName.length;idx++) {
+        if(collectionName[idx][columnName] == valueToMatch) {
+            return collectionName[idx]
         }
     }
     return {}
@@ -31,9 +57,10 @@ const getRowValue = (currentObj, totalStore, obj) => {
     const {matchWith, collectionName, columnName, store, from} = currentObj
     let rowValue = {}
     if (from === 'array') {
-        const [fromWhere, colmnName] = matchWith;
-        const value = (fromWhere === 'base') ? obj[colmnName] : totalStore[parseInt(fromWhere)][colmnName];
+        const [fromWhere, column] = matchWith;
+        const value = (fromWhere === 'base') ? obj[column] : totalStore[parseInt(fromWhere)][column];
         rowValue = getSpecficRowValue(value, mapping[collectionName], columnName);
+        // console.log(rowValue)
         store && totalStore.push(rowValue);
     } else if (from === 'store') {
         rowValue = totalStore[parseInt(collectionName)];
@@ -46,7 +73,8 @@ const getRowValue = (currentObj, totalStore, obj) => {
 }
 
 const lookupHandler = (obj, jsonLogic) => {
-    if(JSON.stringify(obj.baseCondition) === "{}" || checkBaseCondition()) {
+    if(checkBaseCondition(obj, jsonLogic)) {
+       
         const joins = jsonLogic.joins
         let isMatched = false;
         const totalStore = []
@@ -56,19 +84,20 @@ const lookupHandler = (obj, jsonLogic) => {
 
             leftRowValue = getRowValue(currentObj.leftColumn, totalStore, obj)
             rightRowValue = getRowValue(currentObj.rightColumn, totalStore, obj)
-
+            // console.log(leftRowValue, rightRowValue)
             /// IF NOT MATCHED TO LEFT COLUMN
             if(JSON.stringify(rightRowValue) === '{}') {
-                obj.destinationColumn = ''
+                // obj.destinationColumn = ''
                 isMatched = false;
-                return;
+                return "";
             }
-
+            
             isMatched = true;
             if(JSON.stringify(currentObj.joinCondition) !== '{}') {
                 const {from, collectionName, columnName} = currentObj.joinCondition
                 isMatched = false;
                 let valueFromConditionColumn = {}
+                
                 if(from === 'store') {
                     valueFromConditionColumn = totalStore[parseInt(collectionName)][columnName]
                 }
@@ -83,28 +112,34 @@ const lookupHandler = (obj, jsonLogic) => {
             }
         }
         if(isMatched) {
-            const {staticValue, from, tableName, columnName, valueFormate} = jsonLogic.valueFromTarget
+            const {staticValue, from, collectionName, columnName, valueFormate} = jsonLogic.valueFromTarget
+            let finalOutput = ''
             if(staticValue) {
                 jsonLogic.destinationColumn = staticValue
+                finalOutput = staticValue
             } else if(from === 'store') {
-                console.log(totalStore[parseInt(tableName)][columnName])
+                console.log(totalStore[parseInt(collectionName)][columnName])
+                finalOutput = totalStore[parseInt(collectionName)][columnName]
             } else {
-                const [fromWhere, colmnName] = matchWith;
-                const value = (fromWhere === 'base') ? obj[colmnName] : totalStore[parseInt(fromWhere)][colmnName];
-                let finalValue = getSpecficRowValue(value, mapping[tableName], columnName);
+                const [fromWhere, columnName] = matchWith;
+                const value = (fromWhere === 'base') ? obj[columnName] : totalStore[parseInt(fromWhere)][columnName];
+                let finalValue = getSpecficRowValue(value, mapping[collectionName], columnName);
                 if(valueFormate) {
                     finalValue =  formatHandler(finalValue)
                 }
-                jsonLogic.destinationColumn = finalValue;
+                finalOutput = finalValue
+                // jsonLogic.destinationColumn = finalValue;
+                
             }
+            return finalOutput
         }
     } else {
-        obj.destinationColumn = ''
+        return ""
     }
 }
 
 const concatHandler = (obj, inputJson) => {
-    if(JSON.stringify(inputJson.baseCondition) === "{}" || checkBaseCondition()) {
+    if(checkBaseCondition(obj, inputJson)) {
         let finalOutput = '',totalStore = []
         
         for(let idx = 0;idx<inputJson.concatenation.length;idx++) {
@@ -113,15 +148,21 @@ const concatHandler = (obj, inputJson) => {
             let value = {}
             if(from === "client_setup" && mapping[collectionName].length > 0) {
                 value = mapping[collectionName][0]
+            } else if (from === 'array') {
+                const [fromWhere, columnName] = matchWith;
+                const value = (fromWhere === 'base') ? obj[columnName] : totalStore[parseInt(fromWhere)][columnName];
+                rowValue = getSpecficRowValue(value, mapping[collectionName], columnName);
+                store && totalStore.push(rowValue);
             } else if(from === 'store') {
                 value = totalStore[parseInt(collectionName)][columnName]
             } else {
                 value = obj
             }
             finalOutput = `${finalOutput}${value[columnName]}${concatWith}`
+            return finalOutput
         }
     } else {
-        console.log("FROM ELSE")
+        return ""
     }
 }
 
@@ -133,7 +174,7 @@ const operations = {
   };
 
 const calculationHandler = (obj, inputJson) => {
-    if(JSON.stringify(inputJson.baseCondition) === "{}" || checkBaseCondition()) {
+    if(checkBaseCondition(obj, inputJson)) {
         let finalOutput = 0, prevData = {};
         let fullStore = []
         if(inputJson.calculation.length > 0) {
@@ -156,6 +197,11 @@ const calculationHandler = (obj, inputJson) => {
           
             if (from === "client_setup" && mapping[collectionName].length > 0) {
               value = mapping[collectionName][0];
+            } else if (from === 'array') {
+                const [fromWhere, columnName] = matchWith;
+                const value = (fromWhere === 'base') ? obj[columnName] : totalStore[parseInt(fromWhere)][columnName];
+                rowValue = getSpecficRowValue(value, mapping[collectionName], columnName);
+                store && totalStore.push(rowValue);
             } else if (from === 'store') {
               value = totalStore[parseInt(collectionName)];
             } else {
@@ -167,24 +213,105 @@ const calculationHandler = (obj, inputJson) => {
           }
           
 
-        console.log(finalOutput)
+        return finalOutput
     }
 }
 
+function formatDate(inputDateStr) {
+    const date = new Date(inputDateStr);
+  
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
+    const day = String(date.getDate()).padStart(2, '0');
+  
+    const formattedDate = `${month}/${day}/${year}`;
+  
+    return formattedDate;
+  }
+
+  function UniqueDate(inputDateStr) {
+    // Remove all occurrences of "/"
+    const formattedDate = inputDateStr.toString().replace(/\//g, '');
+  
+    return formattedDate;
+  }
+  
+
+const formatHandler = (value, formatType) => {
+    let formatedValue = ''
+    switch(formatType) {
+        case 'Date':
+            formatedValue = formatDate(value);
+            break;
+        case 'DateUnique':
+            formatedValue = formatDate(value);
+            formatedValue = UniqueDate(formatedValue);
+            break;
+        default:
+            console.log("Unknown Type");
+    }
+
+    return formatedValue
+}
+
+const copyHandler = (obj, inputJson) => {
+    let finalOutput = ''
+    if(checkBaseCondition(obj, inputJson)) {
+        const {staticValue, from, collectionName, columnName, valueFormate} = inputJson.valueFromTarget
+        let rowValue = {}
+        if(JSON.stringify(inputJson?.valueFromTarget) !== '{}') {
+            if(staticValue) {
+                finalOutput = staticValue
+            } else if (from === "client_setup" && mapping[collectionName].length > 0) {
+                finalOutput = mapping[collectionName][0][[columnName]];
+              } else if (from === 'array') {
+                  const [fromWhere, columnName] = matchWith;
+                  const value = (fromWhere === 'base') ? obj[columnName] : totalStore[parseInt(fromWhere)][columnName];
+                  rowValue = getSpecficRowValue(value, mapping[collectionName], columnName);
+                  finalOutput = rowValue[columnName]
+                  store && totalStore.push(rowValue);
+              } else if (from === 'store') {
+                rowValue = totalStore[parseInt(collectionName)];
+                finalOutput = rowValue[columnName]
+              } else {
+                rowValue = obj;
+                finalOutput = rowValue[columnName]
+              }
+
+              if(valueFormate) {
+                finalOutput = formatHandler(finalOutput, valueFormate)
+              }
+        }
+    } 
+
+    return finalOutput
+}
+
 gl_detail.forEach(detail => {
+    let finalOutput = {}
     inputJson.operations.forEach(operation => {
+        let calculatedValue = ''
         switch(operation.operationType) {
             case OPERATIONTYPE.LOOKUP:
-                lookupHandler(detail, operation);
+                calculatedValue = lookupHandler(detail, operation);
                 break;
             case OPERATIONTYPE.CONCAT:
-                concatHandler(detail, operation);
+                calculatedValue = concatHandler(detail, operation);
                 break;
             case OPERATIONTYPE.CALCULATION:
-                calculationHandler(detail, operation);
+                calculatedValue = calculationHandler(detail, operation);
+                break;
+            case OPERATIONTYPE.COPY:
+                calculatedValue = copyHandler(detail, operation);
                 break;
             default:
                 console.log("Invalid Operation");
         }
+        finalOutput = {
+            ...finalOutput,
+            [operation.destinationField.newColumnName]: calculatedValue
+        }
     })
+
+    console.log(finalOutput)
 })

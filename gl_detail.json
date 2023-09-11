@@ -7,10 +7,16 @@
             },
             "operationType": "lookup",
             "baseCondition": {
-                "sourceCollectionName": "AtlasGlobalHoa_Client_setup",
-                "targetColumnName": "isInterCompany",
-                "conditionType": "Boolean",
-                "targetValue": ""
+                "collectionName": "AtlasGlobalHoa_Client_setup",
+                "columnName": "isInterCompany",
+                "store": false,
+                "from": "client_setup",
+                "matchValue": [
+                    {
+                        "value": true,
+                        "targetValue": {}
+                    }
+                ]
             },
             "joins": [
                 {
@@ -56,7 +62,7 @@
                                 "valueFrom": {
                                     "from": "store",
                                     "staticValue": "",
-                                    "tableName": 1,
+                                    "collectionName": 1,
                                     "columnName": "tParAcctCode",
                                     "valueFormate": ""
                                 }
@@ -66,7 +72,7 @@
                                 "valueFrom": {
                                     "from": "store",
                                     "staticValue": "",
-                                    "tableName": 1,
+                                    "collectionName": 1,
                                     "columnName": "tAcctCode",
                                     "valueFormate": ""
                                 }
@@ -107,7 +113,7 @@
             "valueFromTarget": {
                 "from": "store",
                 "staticValue": "",
-                "tableName": 0,
+                "collectionName": 0,
                 "columnName": "tAcctCode",
                 "valueFormate": ""
             }
@@ -141,7 +147,7 @@
             "valueFromTarget": {
                 "from": "store",
                 "staticValue": "",
-                "tableName": 0,
+                "collectionName": 0,
                 "columnName": "tGLAcct",
                 "valueFormate": "",
                 "matchWith": []
@@ -150,9 +156,9 @@
         {
             "destinationField": {
                 "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "FundingEntity"
+                "newColumnName": "Remark"
             },
-            "operationType": "",
+            "operationType": "concat",
             "baseCondition": {},
             "concatenation": [
                 {
@@ -170,14 +176,14 @@
                     "concatWith": ""
                 }
             ]
-
+    
         },
         {
             "destinationField": {
                 "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "FundingEntity"
+                "newColumnName": "AMOUNT"
             },
-            "operationType": "",
+            "operationType": "calculation",
             "baseCondition": {},
             "calculation": [
                 {
@@ -195,6 +201,91 @@
                     "operand": "-"
                 }
             ]
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "BOOKNUM"
+            },
+            "operationType": "copy",
+            "baseCondition": {},
+            "calculation": [],
+            "valueFromTarget": {
+                "from": "client_setup",
+                "staticValue": "",
+                "collectionName": "AtlasGlobalHoa_Client_setup",
+                "columnName": "bookNum",
+                "valueFormate": ""
+            }
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "POSTMONTH"
+            },
+            "operationType": "copy",
+            "baseCondition": {},
+            "calculation": [],
+            "valueFromTarget": {
+                "from": "",
+                "staticValue": "",
+                "collectionName": "",
+                "columnName": "acctPeriod",
+                "valueFormate": "Date"
+            }
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "TRANNUM"
+            },
+            "operationType": "copy",
+            "baseCondition": {},
+            "calculation": [],
+            "valueFromTarget": {
+                "from": "",
+                "staticValue": "",
+                "collectionName": "",
+                "columnName": "acctPeriod",
+                "valueFormate": "DateUnique"
+            }
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "DISPLAYTYPE"
+            },
+            "operationType": "copy",
+            "baseCondition": {
+                "collectionName": "AtlasGlobalHoa_Client_setup",
+                "columnName": "isInterCompany",
+                "store": false,
+                "from": "client_setup",
+                "matchValue": [
+                    {
+                        "value": true, 
+                        "targetValue": {
+                            "from": "",
+                            "staticValue": "Intercompany Journal Display Type",
+                            "collectionName": "",
+                            "columnName": "acctPeriod",
+                            "valueFormate": ""
+                        }
+                    },
+                    {
+                        "value": false, 
+                        "targetValue": {
+                            "from": "",
+                            "staticValue": "Standard Journal Display Type",
+                            "collectionName": "",
+                            "columnName": "acctPeriod",
+                            "valueFormate": ""
+                        }
+                    }
+                    ]
+            },
+            "calculation": [],
+            "valueFromTarget": {}
         }
     ]
 }
