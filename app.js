@@ -331,9 +331,11 @@ const startProcessing = (data) => {
 const main = async () => {
     let skip = 0, limit = 10
     const totalDataCount = await getCount()
+    console.log("Total data count:",totalDataCount)
     for(let i = 0;i<=totalDataCount;i = i + limit) {
         const data = await getBaseCollectionData(inputJson.baseCollection, i, limit)
         mapping[inputJson.baseCollection] = data
+        console.log("Data",data)
         startProcessing(data)
     }
 }
