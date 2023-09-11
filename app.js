@@ -139,31 +139,28 @@ const lookupHandler = (obj, jsonLogic) => {
 }
 
 const concatHandler = (obj, inputJson) => {
+    let finalOutput = '',totalStore = []
     if(checkBaseCondition(obj, inputJson)) {
-        let finalOutput = '',totalStore = []
-        
+
         for(let idx = 0;idx<inputJson.concatenation.length;idx++) {
-            const {from, collectionName, columnName, concatWith} = inputJson.concatenation[idx]
-            
+            const {from, collectionName, columnName, concatWith} = inputJson.concatenation[idx] 
             let value = {}
             if(from === "client_setup" && mapping[collectionName].length > 0) {
                 value = mapping[collectionName][0]
             } else if (from === 'array') {
                 const [fromWhere, columnName] = matchWith;
                 const value = (fromWhere === 'base') ? obj[columnName] : totalStore[parseInt(fromWhere)][columnName];
-                rowValue = getSpecficRowValue(value, mapping[collectionName], columnName);
-                store && totalStore.push(rowValue);
+                value = getSpecficRowValue(value, mapping[collectionName], columnName);
+                store && totalStore.push(value);
             } else if(from === 'store') {
-                value = totalStore[parseInt(collectionName)][columnName]
+                value = totalStore[parseInt(collectionName)]
             } else {
                 value = obj
             }
             finalOutput = `${finalOutput}${value[columnName]}${concatWith}`
-            return finalOutput
         }
-    } else {
-        return ""
-    }
+    } 
+    return finalOutput;
 }
 
 const operations = {

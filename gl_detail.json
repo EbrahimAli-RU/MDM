@@ -158,7 +158,7 @@
                 "targetCollectionName": "AtlasGlobalHoa_GL_Output",
                 "newColumnName": "Remark"
             },
-            "operationType": "concat",
+            "operationType": "",
             "baseCondition": {},
             "concatenation": [
                 {
@@ -286,6 +286,33 @@
             },
             "calculation": [],
             "valueFromTarget": {}
-        }
+        },
+        {
+            "destinationField": {
+              "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+              "newColumnName": "REF"
+            },
+            "operationType": "concat",
+            "baseCondition": {},
+            "concatenation": [
+              {
+                "collectionName": "AtlasGlobalHoa_Client_setup",
+                "columnName": "gLREF",
+                "store": false,
+                "from": "client_setup",
+                "concatWith": ","
+              },
+              {
+                "collectionName": "AtlasGlobalHoa_GL_details",
+                "columnName": "propName",
+                "store": false,
+                "from": "",
+                "concatWith": ""
+              }
+            ],
+            "joins": [],
+            "calculation": [],
+            "valueFromTarget": {}
+          }
     ]
 }
