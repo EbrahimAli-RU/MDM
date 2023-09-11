@@ -111,14 +111,13 @@ const lookupHandler = (obj, jsonLogic) => {
                 }
             }
         }
+        let finalOutput = ''
         if(isMatched) {
             const {staticValue, from, collectionName, columnName, valueFormate} = jsonLogic.valueFromTarget
-            let finalOutput = ''
             if(staticValue) {
                 jsonLogic.destinationColumn = staticValue
                 finalOutput = staticValue
             } else if(from === 'store') {
-                console.log(totalStore[parseInt(collectionName)][columnName])
                 finalOutput = totalStore[parseInt(collectionName)][columnName]
             } else {
                 const [fromWhere, columnName] = matchWith;
@@ -128,11 +127,9 @@ const lookupHandler = (obj, jsonLogic) => {
                     finalValue =  formatHandler(finalValue)
                 }
                 finalOutput = finalValue
-                // jsonLogic.destinationColumn = finalValue;
-                
             }
-            return finalOutput
         }
+        return finalOutput
     } else {
         return ""
     }
@@ -251,7 +248,7 @@ const formatHandler = (value, formatType) => {
     return formatedValue
 }
 
-const copyHandler = (obj, inputJson) => {
+const copyHandler = (obj, inputJson, output) => {
     let finalOutput = ''
     if(checkBaseCondition(obj, inputJson)) {
         const {staticValue, from, collectionName, columnName, valueFormate} = inputJson.valueFromTarget
@@ -270,7 +267,11 @@ const copyHandler = (obj, inputJson) => {
               } else if (from === 'store') {
                 rowValue = totalStore[parseInt(collectionName)];
                 finalOutput = rowValue[columnName]
-              } else {
+              } else if(from === 'output'){
+                rowValue = output;
+                finalOutput = rowValue[columnName]
+              }
+              else {
                 rowValue = obj;
                 finalOutput = rowValue[columnName]
               }
@@ -299,7 +300,7 @@ gl_detail.forEach(detail => {
                 calculatedValue = calculationHandler(detail, operation);
                 break;
             case OPERATIONTYPE.COPY:
-                calculatedValue = copyHandler(detail, operation);
+                calculatedValue = copyHandler(detail, operation, finalOutput);
                 break;
             default:
                 console.log("Invalid Operation");

@@ -1,5 +1,319 @@
 {
-    "operations" : [
+    "operations": [
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "TRANNUM"
+            },
+            "operationType": "copy",
+            "baseCondition": {},
+            "concatenation": [],
+            "joins": [],
+            "calculation": [],
+            "valueFromTarget": {
+                "from": "",
+                "staticValue": "",
+                "collectionName": "",
+                "columnName": "transDate",
+                "valueFormate": "DateUnique"
+            }
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "DATE"
+            },
+            "operationType": "copy",
+            "baseCondition": {},
+            "concatenation": [],
+            "joins": [],
+            "calculation": [],
+            "valueFromTarget": {
+                "from": "",
+                "staticValue": "",
+                "collectionName": "",
+                "columnName": "transDate",
+                "valueFormate": "Date"
+            }
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "PROPERTY"
+            },
+            "operationType": "lookup",
+            "baseCondition": {},
+            "concatenation": [],
+            "joins": [
+                {
+                    "leftColumn": {
+                        "collectionName": "AtlasGlobalHoa_GL_details",
+                        "columnName": "sPropCode",
+                        "store": false,
+                        "from": "",
+                        "matchWith": []
+                    },
+                    "rightColumn": {
+                        "collectionName": "AtlasGlobalHoa_Property_mapping",
+                        "columnName": "sPropCode",
+                        "store": true,
+                        "from": "array",
+                        "matchWith": [
+                            "base",
+                            "sPropCode"
+                        ]
+                    },
+                    "joinCondition": {}
+                }
+            ],
+            "calculation": [],
+            "valueFromTarget": {
+                "from": "store",
+                "staticValue": "",
+                "collectionName": 0,
+                "columnName": "tAcctCode",
+                "valueFormate": "",
+                "matchWith": []
+            }
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "ACCOUNT"
+            },
+            "operationType": "lookup",
+            "baseCondition": {},
+            "concatenation": [],
+            "joins": [
+                {
+                    "leftColumn": {
+                        "collectionName": "AtlasGlobalHoa_GL_details",
+                        "columnName": "acct",
+                        "store": false,
+                        "from": "",
+                        "matchWith": []
+                    },
+                    "rightColumn": {
+                        "collectionName": "AtlasGlobalHoa_GL_mapping",
+                        "columnName": "sGLAcct",
+                        "store": true,
+                        "from": "array",
+                        "matchWith": [
+                            "base",
+                            "acct"
+                        ]
+                    },
+                    "joinCondition": {}
+                }
+            ],
+            "calculation": [],
+            "valueFromTarget": {
+                "from": "store",
+                "staticValue": "",
+                "collectionName": 0,
+                "columnName": "tGLAcct",
+                "valueFormate": "",
+                "matchWith": []
+            }
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "POSTMONTH"
+            },
+            "operationType": "copy",
+            "baseCondition": {},
+            "concatenation": [],
+            "joins": [],
+            "calculation": [],
+            "outputColumnName": "POSTMONTH",
+            "valueFromTarget": {
+                "from": "",
+                "staticValue": "",
+                "collectionName": "",
+                "columnName": "acctPeriod",
+                "valueFormate": "Date"
+            }
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "BOOKNUM"
+            },
+            "operationType": "copy",
+            "baseCondition": {},
+            "concatenation": [],
+            "joins": [],
+            "calculation": [],
+            "valueFromTarget": {
+                "from": "client_setup",
+                "staticValue": "",
+                "collectionName": "AtlasGlobalHoa_Client_setup",
+                "columnName": "bookNum",
+                "valueFormate": ""
+            }
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "AMOUNT"
+            },
+            "operationType": "calculation",
+            "baseCondition": {},
+            "concatenation": [],
+            "joins": [],
+            "calculation": [
+                {
+                    "collectionName": "AtlasGlobalHoa_GL_details",
+                    "columnName": "transDebitAmt",
+                    "store": false,
+                    "from": "",
+                    "operand": ""
+                },
+                {
+                    "collectionName": "AtlasGlobalHoa_GL_details",
+                    "columnName": "transCreditAmt",
+                    "store": false,
+                    "from": "",
+                    "operand": "-"
+                }
+            ],
+            "valueFromTarget": {}
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "DESC"
+            },
+            "operationType": "concat",
+            "baseCondition": {},
+            "concatenation": [
+                {
+                    "collectionName": "AtlasGlobalHoa_GL_details",
+                    "columnName": "transDesc",
+                    "store": false,
+                    "from": "",
+                    "concatWith": " / "
+                },
+                {
+                    "collectionName": "AtlasGlobalHoa_GL_details",
+                    "columnName": "transControl",
+                    "store": false,
+                    "from": "",
+                    "concatWith": " / "
+                },
+                {
+                    "collectionName": "AtlasGlobalHoa_GL_details",
+                    "columnName": "transReference",
+                    "store": false,
+                    "from": "",
+                    "concatWith": " / "
+                },
+                {
+                    "collectionName": "AtlasGlobalHoa_GL_details",
+                    "columnName": "transRemarks",
+                    "store": false,
+                    "from": "",
+                    "concatWith": ""
+                }
+            ],
+            "joins": [],
+            "calculation": [],
+            "valueFromTarget": {}
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "REF"
+            },
+            "operationType": "concat",
+            "baseCondition": {},
+            "concatenation": [
+                {
+                    "collectionName": "AtlasGlobalHoa_Client_setup",
+                    "columnName": "gLREF",
+                    "store": false,
+                    "from": "client_setup",
+                    "concatWith": " / "
+                },
+                {
+                    "collectionName": "AtlasGlobalHoa_GL_details",
+                    "columnName": "propName",
+                    "store": false,
+                    "from": "",
+                    "concatWith": ""
+                }
+            ],
+            "joins": [],
+            "calculation": [],
+            "valueFromTarget": {}
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "Remark"
+            },
+            "operationType": "concat",
+            "baseCondition": {},
+            "concatenation": [
+                {
+                    "collectionName": "AtlasGlobalHoa_Client_setup",
+                    "columnName": "glRemark",
+                    "store": false,
+                    "from": "client_setup",
+                    "concatWith": " / "
+                },
+                {
+                    "collectionName": "AtlasGlobalHoa_GL_details",
+                    "columnName": "propName",
+                    "store": false,
+                    "from": "",
+                    "concatWith": ""
+                }
+            ],
+            "joins": [],
+            "calculation": [],
+            "valueFromTarget": {}
+        },
+        {
+            "destinationField": {
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "DISPLAYTYPE"
+            },
+            "operationType": "copy",
+            "baseCondition": {
+                "collectionName": "AtlasGlobalHoa_Client_setup",
+                "columnName": "isInterCompany",
+                "store": false,
+                "from": "client_setup",
+                "matchValue": [
+                    {
+                        "value": true,
+                        "targetValue": {
+                            "from": "",
+                            "staticValue": "Intercompany Journal Display Type",
+                            "collectionName": "",
+                            "columnName": "",
+                            "valueFormate": ""
+                        }
+                    },
+                    {
+                        "value": false,
+                        "targetValue": {
+                            "from": "",
+                            "staticValue": "Standard Journal Display Type",
+                            "collectionName": "",
+                            "columnName": "",
+                            "valueFormate": ""
+                        }
+                    }
+                ]
+            },
+            "concatenation": [],
+            "joins": [],
+            "calculation": [],
+            "valueFromTarget": {}
+        },
         {
             "destinationField": {
                 "targetCollectionName": "AtlasGlobalHoa_GL_Output",
@@ -18,6 +332,7 @@
                     }
                 ]
             },
+            "concatenation": [],
             "joins": [
                 {
                     "leftColumn": {
@@ -32,7 +347,10 @@
                         "columnName": "sGLAcct",
                         "store": true,
                         "from": "array",
-                        "matchWith": ["base", "acct"]
+                        "matchWith": [
+                            "base",
+                            "acct"
+                        ]
                     },
                     "joinCondition": {}
                 },
@@ -49,9 +367,11 @@
                         "columnName": "sPropCode",
                         "store": true,
                         "from": "array",
-                        "matchWith": ["base", "sPropCode"]
+                        "matchWith": [
+                            "base",
+                            "sPropCode"
+                        ]
                     },
-                
                     "joinCondition": {
                         "from": "store",
                         "collectionName": "0",
@@ -77,7 +397,7 @@
                                     "valueFormate": ""
                                 }
                             }
-                          ]
+                        ]
                     }
                 }
             ],
@@ -87,173 +407,7 @@
         {
             "destinationField": {
                 "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "PROPERTY"
-            },
-            "operationType": "lookup",
-            "baseCondition": {},
-            "joins": [
-                {
-                    "leftColumn": {
-                        "collectionName": "AtlasGlobalHoa_GL_details",
-                        "columnName": "sPropCode",
-                        "store": false,
-                        "from": "",
-                        "matchWith": []
-                    },
-                    "rightColumn": {
-                        "collectionName": "AtlasGlobalHoa_Property_mapping",
-                        "columnName": "sPropCode",
-                        "store": true,
-                        "from": "array",
-                        "matchWith": ["base", "sPropCode"]
-                    },
-                    "joinCondition": {}
-                }
-            ],
-            "valueFromTarget": {
-                "from": "store",
-                "staticValue": "",
-                "collectionName": 0,
-                "columnName": "tAcctCode",
-                "valueFormate": ""
-            }
-        },
-        {
-            "destinationField": {
-                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "ACCOUNT"
-            },
-            "operationType": "lookup",
-            "baseCondition": {},
-            "joins": [
-                {
-                    "leftColumn": {
-                        "collectionName": "AtlasGlobalHoa_GL_details",
-                        "columnName": "acct",
-                        "store": false,
-                        "from": "",
-                        "matchWith": []
-                    },
-                    "rightColumn": {
-                        "collectionName": "AtlasGlobalHoa_GL_mapping",
-                        "columnName": "sGLAcct",
-                        "store": true,
-                        "from": "array",
-                        "matchWith": ["base", "acct"]
-                    },
-                    "joinCondition": {}
-                }
-            ],
-            "valueFromTarget": {
-                "from": "store",
-                "staticValue": "",
-                "collectionName": 0,
-                "columnName": "tGLAcct",
-                "valueFormate": "",
-                "matchWith": []
-            }
-        },
-        {
-            "destinationField": {
-                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "Remark"
-            },
-            "operationType": "",
-            "baseCondition": {},
-            "concatenation": [
-                {
-                    "collectionName": "AtlasGlobalHoa_Client_setup",
-                    "columnName": "glRemark",
-                    "store": false,
-                    "from": "client_setup",
-                    "concatWith": " "
-                },
-                {
-                    "collectionName": "AtlasGlobalHoa_GL_details",
-                    "columnName": "propName",
-                    "store": false,
-                    "from": "",
-                    "concatWith": ""
-                }
-            ]
-    
-        },
-        {
-            "destinationField": {
-                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "AMOUNT"
-            },
-            "operationType": "calculation",
-            "baseCondition": {},
-            "calculation": [
-                {
-                    "collectionName": "AtlasGlobalHoa_GL_details",
-                    "columnName": "transCreditAmt",
-                    "store": false,
-                    "from": "",
-                    "operand": ""
-                },
-                {
-                    "collectionName": "AtlasGlobalHoa_GL_details",
-                    "columnName": "transDebitAmt",
-                    "store": false,
-                    "from": "",
-                    "operand": "-"
-                }
-            ]
-        },
-        {
-            "destinationField": {
-                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "BOOKNUM"
-            },
-            "operationType": "copy",
-            "baseCondition": {},
-            "calculation": [],
-            "valueFromTarget": {
-                "from": "client_setup",
-                "staticValue": "",
-                "collectionName": "AtlasGlobalHoa_Client_setup",
-                "columnName": "bookNum",
-                "valueFormate": ""
-            }
-        },
-        {
-            "destinationField": {
-                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "POSTMONTH"
-            },
-            "operationType": "copy",
-            "baseCondition": {},
-            "calculation": [],
-            "valueFromTarget": {
-                "from": "",
-                "staticValue": "",
-                "collectionName": "",
-                "columnName": "acctPeriod",
-                "valueFormate": "Date"
-            }
-        },
-        {
-            "destinationField": {
-                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "TRANNUM"
-            },
-            "operationType": "copy",
-            "baseCondition": {},
-            "calculation": [],
-            "valueFromTarget": {
-                "from": "",
-                "staticValue": "",
-                "collectionName": "",
-                "columnName": "acctPeriod",
-                "valueFormate": "DateUnique"
-            }
-        },
-        {
-            "destinationField": {
-                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-                "newColumnName": "DISPLAYTYPE"
+                "newColumnName": "TISINTERCOMPANY"
             },
             "operationType": "copy",
             "baseCondition": {
@@ -263,56 +417,49 @@
                 "from": "client_setup",
                 "matchValue": [
                     {
-                        "value": true, 
+                        "value": true,
                         "targetValue": {
                             "from": "",
-                            "staticValue": "Intercompany Journal Display Type",
+                            "staticValue": "1",
                             "collectionName": "",
-                            "columnName": "acctPeriod",
+                            "columnName": "",
                             "valueFormate": ""
                         }
                     },
                     {
-                        "value": false, 
+                        "value": false,
                         "targetValue": {
                             "from": "",
-                            "staticValue": "Standard Journal Display Type",
+                            "staticValue": " ",
                             "collectionName": "",
-                            "columnName": "acctPeriod",
+                            "columnName": "",
                             "valueFormate": ""
                         }
                     }
-                    ]
+                ]
             },
+            "concatenation": [],
+            "joins": [],
             "calculation": [],
             "valueFromTarget": {}
         },
         {
             "destinationField": {
-              "targetCollectionName": "AtlasGlobalHoa_GL_Output",
-              "newColumnName": "REF"
+                "targetCollectionName": "AtlasGlobalHoa_GL_Output",
+                "newColumnName": "Company"
             },
-            "operationType": "concat",
+            "operationType": "copy",
             "baseCondition": {},
-            "concatenation": [
-              {
-                "collectionName": "AtlasGlobalHoa_Client_setup",
-                "columnName": "gLREF",
-                "store": false,
-                "from": "client_setup",
-                "concatWith": ","
-              },
-              {
-                "collectionName": "AtlasGlobalHoa_GL_details",
-                "columnName": "propName",
-                "store": false,
-                "from": "",
-                "concatWith": ""
-              }
-            ],
+            "concatenation": [],
             "joins": [],
             "calculation": [],
-            "valueFromTarget": {}
-          }
+            "valueFromTarget": {
+                "from": "output",
+                "staticValue": "",
+                "collectionName": "",
+                "columnName": "FundingEntity",
+                "valueFormate": ""
+            }
+        }
     ]
-}
+  }
