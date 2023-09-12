@@ -330,18 +330,21 @@ export const handler = async (event, context) => {
     console.log(JSON.stringify(event));
     const inputJson = jsonMapping[event.collectionName]
   
-    async function main() {
-      try {
-        const connection = await pool.promise().getConnection();
-        console.log("Instruction", event)
-        await fetchAndProcessBatch(event, connection);
-        connection.release();
-      } catch (err) {
-        console.error('Error:', err);
+    const main = async () => {
+        try {
+            const response = await getCollectionsData(inputJson.collectionNames)
+            if(inputJson.collectionNames.length === response.length) {
+                mappingHandler(inputJson.collectionNames, response)
+                await getCountAndProcessingData(inputJson)
+            } else {
+                throw Error;
+            }
+        } catch(err) {
+            console.log("FROM APP", err)
+        }
       }
-    }
-  
-    await main();
+    
+      await main()
   };
 
   const main = async () => {
