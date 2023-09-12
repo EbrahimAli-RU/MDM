@@ -1,29 +1,14 @@
-const {operationTypes : OPERATIONTYPE, collectionNames} = require("./operationTypes")
-const { getTokenHandler, getCount, getBaseCollectionData } = require('./services')
-const client_setup = require('./client_setup')
-const gl_detail = require('./gl_detail')
-const gl_mapping = require('./gl_mapping')
-const property_mapping = require('./property_mapping')
-const segment_mapping = require('./segment_mapping')
-const inputJson = require("./gl_detail.json")
+const {operationTypes : OPERATIONTYPE} = require("./operationTypes")
+const { getCollectionsData, getCount, getBaseCollectionData, insertToOutpotTable } = require('./services')
+const GL_JSON = require("./gl_detail.json")
 
 const mapping = {};
 
 const mappingHandler = (collectionNames, res) => {
-    for (let i = 1; i < collectionNames.length; i++) {
-        mapping[collectionNames[i]] = res[i-1].data.data;
+    for (let i = 0; i < collectionNames.length; i++) {
+        mapping[collectionNames[i]] = res[i]?.data?.data;
     }
 }
-
-
-
-// const mapping = {
-//     AtlasGlobalHoa_GL_details: gl_detail,
-//     AtlasGlobalHoa_GL_mapping: gl_mapping,
-//     AtlasGlobalHoa_Property_mapping: property_mapping,
-//     AtlasGlobalHoa_Client_setup: client_setup,
-//     AtlasGlobalHoa_Segment_mapping: segment_mapping
-//   }
 
 const checkBaseCondition = (obj, inputJson) => {
     if(JSON.stringify(inputJson.baseCondition) === '{}') return true
@@ -56,6 +41,7 @@ const checkBaseCondition = (obj, inputJson) => {
 }
 
 const getSpecficRowValue = (valueToMatch, collectionName, columnName) => {
+
     for(let idx = 0;idx<collectionName.length;idx++) {
         if(collectionName[idx][columnName] == valueToMatch) {
             return collectionName[idx]
@@ -71,7 +57,6 @@ const getRowValue = (currentObj, totalStore, obj) => {
         const [fromWhere, column] = matchWith;
         const value = (fromWhere === 'base') ? obj[column] : totalStore[parseInt(fromWhere)][column];
         rowValue = getSpecficRowValue(value, mapping[collectionName], columnName);
-        // console.log(rowValue)
         store && totalStore.push(rowValue);
     } else if (from === 'store') {
         rowValue = totalStore[parseInt(collectionName)];
@@ -95,10 +80,8 @@ const lookupHandler = (obj, jsonLogic) => {
 
             leftRowValue = getRowValue(currentObj.leftColumn, totalStore, obj)
             rightRowValue = getRowValue(currentObj.rightColumn, totalStore, obj)
-            // console.log(leftRowValue, rightRowValue)
             /// IF NOT MATCHED TO LEFT COLUMN
             if(JSON.stringify(rightRowValue) === '{}') {
-                // obj.destinationColumn = ''
                 isMatched = false;
                 return "";
             }
@@ -296,7 +279,7 @@ const copyHandler = (obj, inputJson, output) => {
     return finalOutput
 }
 
-const startProcessing = (data) => {
+const startProcessing = (data, inputJson) => {
     let finalData = []
     data.forEach(detail => {
         let finalOutput = {}
@@ -329,29 +312,51 @@ const startProcessing = (data) => {
     return finalData
 }
 
-const main = async () => {
+const getCountAndProcessingData = async (inputJson) => {
     let skip = 0, limit = 10
-    const totalDataCount = await getCount()
-    console.log("Total data count:",totalDataCount)
+    const totalDataCount = await getCount(inputJson.baseCollection)
     for(let i = 0;i<=totalDataCount;i = i + limit) {
         const data = await getBaseCollectionData(inputJson.baseCollection, i, limit)
         mapping[inputJson.baseCollection] = data
-        // console.log("Data",data)
-        console.log(startProcessing(data))
+        await insertToOutpotTable(startProcessing(data, inputJson), inputJson.outputCollectionNames)
     }
 }
 
-    
+const jsonMapping = {
+    AtlasGlobalHoa_GL_Output : GL_JSON
+}
 
-getTokenHandler().then(res => {
-    //console.log(res) 
-    if((collectionNames.length - 1) === res.length) {
-        mappingHandler(collectionNames, res)
-        main()
-    } else {
-        throw Error;
+export const handler = async (event, context) => {
+    console.log(JSON.stringify(event));
+    const inputJson = jsonMapping[event.collectionName]
+  
+    async function main() {
+      try {
+        const connection = await pool.promise().getConnection();
+        console.log("Instruction", event)
+        await fetchAndProcessBatch(event, connection);
+        connection.release();
+      } catch (err) {
+        console.error('Error:', err);
+      }
     }
-    
-    }).catch(err => {
+  
+    await main();
+  };
+
+  const main = async () => {
+    const inputJson = jsonMapping['AtlasGlobalHoa_GL_Output']
+    try {
+        const response = await getCollectionsData(inputJson.collectionNames)
+        if(inputJson.collectionNames.length === response.length) {
+            mappingHandler(inputJson.collectionNames, response)
+            await getCountAndProcessingData(inputJson)
+        } else {
+            throw Error;
+        }
+    } catch(err) {
         console.log("FROM APP", err)
-    })
+    }
+  }
+
+  main()
