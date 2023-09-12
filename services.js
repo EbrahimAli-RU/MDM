@@ -20,7 +20,7 @@ const getTokenHandler = async () => {
     try {
         const response =  await axios.post(`${url.baseUrl}/v3/accounts/api-token`, payload,
         {headers: {'Authorization': `Basic c3VwZXJ1c2VyOmNqZGpkamdodTc1NjRAZmpmayEhOTg3NjY1` }})
-        return response.data
+        return response?.data
         // return await getAllCollectionData()
     } catch(err) {
         console.log("Failed to get Credential")
@@ -40,7 +40,10 @@ const getCount = async (collectionName) => {
           },
           {headers: {'Authorization': `Bearer ${credential.accessToken}` }}
         )
-        return response.data.data[0].count;
+        if(response?.data?.data.length > 0) {
+            return response.data.data[0].count;
+        }
+        return 0
     } catch(err) {
         console.log('From Response')
         return 0;
@@ -59,7 +62,7 @@ const getBaseCollectionData = async (collectionName, skip, limit) => {
           },
           {headers: {'Authorization': `Bearer ${credential.accessToken}` }}
         )
-        return response.data.data
+        return response?.data?.data
     } catch(err) {
         console.log('From Response')
         return []
